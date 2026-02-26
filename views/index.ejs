@@ -1,32 +1,43 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Product Admin</title>
-</head>
-<body>
-    <div>
-        <h1>Product Admin Interface</h1>
-        <p><a href="/add">Add Product</a></p>
+<h1>Admin Dashboard</h1>
 
-        <ol>
-            <% products.forEach(product => { %>
-                <li>
-                    <strong><%= product.name %></strong><br>
-                    <%= product.description %><br>
-                    ₹ <%= product.price %><br><br>
+<!-- USERS -->
+<h2>Users</h2>
+<a href="/users/add">Add User</a>
 
-                    <!-- Edit -->
-                    <a href="/<%= product._id %>/edit">Edit</a>
+<ol>
+  <% users.forEach(user => { %>
+    <li>
+      <%= user.name %> -
+      <%= user.email %> -
+      <%= user.phoneNumber %>
 
-                    <!-- Delete -->
-                    <a href="/<%= product._id %>/delete">Delete</a>
+      <a href="/users/<%= user._id %>/edit">Edit</a>
 
-                    <hr>
-                </li>
-            <% }) %>
-        </ol>
-    </div>
-</body>
-</html>
+      <form action="/users/<%= user._id %>/delete" method="POST" style="display:inline;">
+        <button type="submit">Delete</button>
+      </form>
+    </li>
+  <% }) %>
+</ol>
+
+<hr>
+
+<!-- PRODUCTS -->
+<h2>Products</h2>
+<a href="/products/add">Add Product</a>
+
+<ol>
+  <% products.forEach(product => { %>
+    <li>
+      <%= product.name %> -
+      <%= product.description %> -
+      ₹ <%= product.price %>
+
+      <a href="/products/<%= product._id %>/edit">Edit</a>
+
+      <form action="/products/<%= product._id %>/delete" method="POST" style="display:inline;">
+        <button type="submit">Delete</button>
+      </form>
+    </li>
+  <% }) %>
+</ol>

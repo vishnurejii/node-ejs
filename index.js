@@ -1,108 +1,122 @@
 import express from "express";
 import mongoose from "mongoose";
-
+import expressLayouts from "express-ejs-layouts";
 const app = express();
-
+app.use(expressLayouts)
+app.set("layout","layout")
+app.set("view engine", "ejs");
+app.use(express.static("public"))
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
-
-app.set("view engine", "ejs");
-
-// -------------------- DB CONNECTION --------------------
 const dbConnect = async () => {
-    await mongoose.connect("mongodb://localhost:27017/merndb");
-    console.log("Database Connected");
+  await mongoose.connect("mongodb://localhost:27017/merndb");
 };
-
 const startServer = async () => {
-    await dbConnect();
-    app.listen(8080, () => {
-        console.log("Server started on port 8080");
-    });
+  await dbConnect();
+  app.listen(8080, () => console.log("Server started"));
 };
 
-// -------------------- SCHEMA --------------------
-const productSchema = new mongoose.Schema({
-    name: { type: String, required: true },
-    description: { type: String, required: true },
-    price: { type: Number, required: true },
-    imageUrl: { type: String, required: true }
-}, { timestamps: true });
+//*******product Schema************* */
+const productSchema = mongoose.Schema({
+  name: { type: String, required: true },
+  description: { type: String, required: true },
+  price: { type: Number, required: true },
+  imageurl: { type: String, required: true },
+});
 
-const ProductModel = mongoose.model("Product", productSchema);
 
-// -------------------- ROUTES --------------------
+//*******userSchema************* */
+const userSchema = mongoose.Schema({
+  name: { type: String, required: true },
+  email: { type: String, required: true ,unique:true },
+  phoneNumber: { type: Number, required: true },
+  password: {type: String ,required: true}
+});
 
-// GET all products
+
+const productModel = mongoose.model("products", productSchema);
+
+
+app.get("/products/add", (req, res) => {
+  res.render("add");
+});
+
+app.post("/products/save", async (req, res) => {
+  await productModel.create(req.body);
+  res.redirect("/");
+});
+
+app.get("/products/:id/edit", async (req, res) => {
+  const product = await productModel.findById(req.params.id);
+  res.render("edit", { product });
+});
+
+app.post("/products/:id/save", async (req, res) => {
+  await productModel.findByIdAndUpdate(req.params.id, req.body);
+  res.redirect("/");
+});
+
+app.post("/products/:id/delete", async (req, res) => {
+  await productModel.findByIdAndDelete(req.params.id);
+  res.redirect("/");
+});
+
+
+//************user routes */
+const userModel = mongoose.model("users", userSchema);
 app.get("/", async (req, res) => {
-    try {
-        const result = await ProductModel.find();
-        res.render("index", { products: result });
-    } catch (error) {
-        res.status(500).json({ message: error.message });
-    }
+  const products = await productModel.find();
+  const users = await userModel.find();
+  res.render("index", { products, users });
 });
-app.get("/add", async (req, res) => {
-   res.render("add")
+app.get("/users/add", (req, res) => {
+  res.render("adduser");
 });
 
-// CREATE product
-app.post("/save", async (req, res) => {
-    try {
-        const body = req.body;
-        await ProductModel.create(body);
-        // res.status(201).json({ message: "Product created successfully" });
-        res.redirect("/")
-    } catch (error) {
-        res.status(400).json({ message: error.message });
-    }
+app.post("/users/save", async (req, res) => {
+  await userModel.create(req.body);
+  res.redirect("/");
 });
 
-app.get("/:id/edit", async (req, res) => {
-    const product = await ProductModel.findById(req.params.id);
-    res.render("edit", { product });
-});
-app.post("/:id/save-product",async(req,res)=>{
-    const id=req.params.id
-    const body=req.body
-    await ProductModel.findByIdAndUpdate(id,body)
-    res.redirect("/")
-})
-
-app.get("/:id/delete", async (req, res) => {
-    try {
-        const product = await ProductModel.findById(req.params.id);
-        res.render("delete", { product });
-    } catch (error) {
-        res.status(400).json({ message: error.message });
-    }
+app.get("/users/:id/edit", async (req, res) => {
+  const user = await userModel.findById(req.params.id);
+  res.render("edituser", { user });
 });
 
-app.post("/:id/delete", async (req, res) => {
-    try {
-        await ProductModel.findByIdAndDelete(req.params.id);
-        res.redirect("/");
-    } catch (error) {
-        res.status(400).json({ message: error.message });
-    }
+app.post("/users/:id/save", async (req, res) => {
+  await userModel.findByIdAndUpdate(req.params.id, req.body);
+  res.redirect("/");
 });
+
+app.post("/users/:id/delete", async (req, res) => {
+  await userModel.findByIdAndDelete(req.params.id);
+  res.redirect("/");
+});
+// Show edit user form
+app.get("/users/:id/edit", async (req, res) => {
+  const user = await userModel.findById(req.params.id);
+  res.render("edituser", { user });
+});
+
+// Save edited user
+app.post("/users/:id/save", async (req, res) => {
+  await userModel.findByIdAndUpdate(req.params.id, req.body);
+  res.redirect("/");
+});
+app.post("/users/:id/delete", async (req, res) => {
+  await userModel.findByIdAndDelete(req.params.id);
+  res.redirect("/");
+});
+// // Show delete confirmation
+// app.get("/:id/delete", async (req, res) => {
+//   const product = await productModel.findById(req.params.id);
+//   res.render("delete", { product });
+// });
+
+// // Delete after confirmation
+// app.post("/:id/delete", async (req, res) => {
+//   await productModel.findByIdAndDelete(req.params.id);
+//   res.redirect("/");
+// });
 
 startServer();
-// app.get("/", (req, res) => {
-//     res.render("index", { name: "john" });
-// });
-
-// const products = [
-//     { id: 1, name: "product1", price: 200 },
-//     { id: 2, name: "product2", price: 300 },
-//     { id: 3, name: "product3", price: 400 },
-//     { id: 4, name: "product4", price: 500 },
-// ];
-
-// app.get("/products", (req, res) => {
-//     res.render("products", { products });
-// });
-
-// app.listen(8080, () => {
-//     console.log("Server running on port 8080");
-// });
