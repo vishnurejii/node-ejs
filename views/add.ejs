@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Product</title>
+</head>
+<body>
+    <div>
+        <form action="/save" method="POST">
+            <li>
+                <input type="text" name="name" placeholder="Enter product name" required>
+                
+                <input type="text" name="description" placeholder="Enter description" required>
+                
+                <input type="number" name="price" placeholder="Enter price" required>
+                
+                <input type="url" name="imageUrl" placeholder="Enter image URL" required>
+                
+                <button type="submit">Save</button>
+            </li>
+        </form>
+    </div>
+</body>
+</html>
